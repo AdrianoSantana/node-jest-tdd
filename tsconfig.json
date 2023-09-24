@@ -5,7 +5,15 @@
     "target": "ES2021",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"],
+      "@/tests/*": ["../tests/*"]
+    },
+    "strict": true,
   },
   "include": ["src"]
 }

@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node dist/main/api/index.js",
     "build": "rimraf dist && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,9 +12,12 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/module-alias": "^2.0.2",
+    "@types/node": "^20.6.5",
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "module-alias": "^2.2.3",
     "rimraf": "^5.0.1"
   }
 }
