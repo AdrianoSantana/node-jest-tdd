@@ -6,14 +6,19 @@
   "scripts": {
     "start": "node dist/main/api/index.js",
     "build": "rimraf dist && tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --passWithNoTests --no-cache --runInBand",
+    "test:watch": "npm test -- --coverage",
+    "test:coverage": "jest -- --coverage"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^29.5.5",
     "@types/module-alias": "^2.0.2",
     "@types/node": "^20.6.5",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
   },
   "dependencies": {
