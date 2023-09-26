@@ -7,7 +7,7 @@
     "start": "node dist/main/api/index.js",
     "build": "rimraf dist && tsc",
     "test": "jest --passWithNoTests --no-cache --runInBand",
-    "test:watch": "npm test -- --coverage",
+    "test:watch": "npm test -- --coverage --watch",
     "test:coverage": "jest -- --coverage"
   },
   "keywords": [],
