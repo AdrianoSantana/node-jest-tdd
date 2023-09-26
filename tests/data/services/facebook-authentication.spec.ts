@@ -1,7 +1,7 @@
 import { FacebookAuthenticationService } from '../../../src/data/services'
 import { AuthenticationError } from '../../../src/domain/errors/authentication'
 import { LoadFacebookUserApi } from '../../../src/data/contracts/api'
-
+    
 class LoadFacebookUserApiSpy implements LoadFacebookUserApi {
   token?: string
   result = undefined
