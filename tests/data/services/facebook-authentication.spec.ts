@@ -9,8 +9,7 @@ import { mock, MockProxy } from 'jest-mock-extended'
 
 describe('FacebookAuthenticationService', () => {
   let loadFacebookUserApi: MockProxy<LoadFacebookUserApi>
-  let loadUserAccountRepository: MockProxy<LoadUserAccountRepository>
-  let createFacebookAccountRepository: MockProxy<CreateFacebookAccountRepository>
+  let userAccountRepository: MockProxy<LoadUserAccountRepository & CreateFacebookAccountRepository>
 
   let sut: FacebookAuthenticationService
   const token = 'any_token'
@@ -22,11 +21,9 @@ describe('FacebookAuthenticationService', () => {
       email: 'any_fb_email',
       facebookId: 'any_fb_id'
     })
-    loadUserAccountRepository = mock<LoadUserAccountRepository>()
-    createFacebookAccountRepository = mock<CreateFacebookAccountRepository>()
-
+    userAccountRepository = mock<LoadUserAccountRepository & CreateFacebookAccountRepository>()
     
-    sut = new FacebookAuthenticationService(loadFacebookUserApi, loadUserAccountRepository, createFacebookAccountRepository)
+    sut = new FacebookAuthenticationService(loadFacebookUserApi, userAccountRepository)
   })
 
   it('should call loadFacebookUserApi with correct params', async () => {
@@ -45,19 +42,19 @@ describe('FacebookAuthenticationService', () => {
   it('should call LoadUserAccountRepository when LoadFaceBookUserApi returns data', async() => {
     await sut.perform({ token })
 
-    expect(loadUserAccountRepository.load).toHaveBeenCalledWith({ email: 'any_fb_email' })
-    expect(loadUserAccountRepository.load).toHaveBeenCalledTimes(1)
+    expect(userAccountRepository.load).toHaveBeenCalledWith({ email: 'any_fb_email' })
+    expect(userAccountRepository.load).toHaveBeenCalledTimes(1)
   })
 
   it('should call createFacebookAccountRepository when LoadUserAccountRepository returns undefined', async() => {
-    loadUserAccountRepository.load.mockResolvedValueOnce(undefined)
+    userAccountRepository.load.mockResolvedValueOnce(undefined)
     await sut.perform({ token })
 
-    expect(createFacebookAccountRepository.createFromFacebook).toHaveBeenCalledWith({ 
+    expect(userAccountRepository.createFromFacebook).toHaveBeenCalledWith({ 
       email: 'any_fb_email',
       name: 'any_fb_name',
       facebookId: 'any_fb_id' 
     })
-    expect(createFacebookAccountRepository.createFromFacebook).toHaveBeenCalledTimes(1)
+    expect(userAccountRepository.createFromFacebook).toHaveBeenCalledTimes(1)
   })
 })
