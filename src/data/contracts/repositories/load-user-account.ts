@@ -7,6 +7,8 @@ export namespace LoadUserAccountRepository {
     email: string
   }
 
-  export type Result = undefined
-
+  export type Result = undefined | {
+    id: string
+    name?: string
+  }
 }
