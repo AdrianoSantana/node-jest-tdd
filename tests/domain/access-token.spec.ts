@@ -7,4 +7,8 @@ describe('Access Token', () => {
     const sut = new AccessToken('any_value')
     expect(sut).toEqual({ value: 'any_value'})
   })
+
+  it('should expire in 1800000ms', () => {
+    expect(AccessToken.expirationInMs).toBe(1800000)
+  })
 })
