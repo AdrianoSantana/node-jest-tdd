@@ -14,7 +14,9 @@
       "@/tests/*": ["../tests/*"]
     },
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
   },
   "include": ["src"],
 }
