@@ -3,34 +3,8 @@ import { LoadUserAccountRepository } from '@/data/contracts/repositories'
 import { IBackup, IMemoryDb, newDb } from 'pg-mem'
 import { PgUser } from '@/infra/postgres/entities'
 import { PgAccountRepository } from '@/infra/postgres/repositories'
+import { makeFakeDataSource, makeFakeDb } from '../mocks/connection'
 
-const makeFakeDb = async (): Promise<IMemoryDb> => {
-    const db = newDb({
-        autoCreateForeignKeyIndices: true
-    })
-     
-    db.public.registerFunction({
-        implementation: () => 'test',
-        name: 'current_database',
-    });
-
-    db.public.registerFunction({
-        implementation: () => 'test',
-        name: 'version',
-    })
-    return db
-}
-
-const makeFakeDataSource = async (db: IMemoryDb): Promise<DataSource>  => {
-    const dataSource = await db.adapters.createTypeormDataSource({
-        type: 'postgres',
-        entities: ['src/infra/postgres/entities/index.ts']
-    })
-        
-    await dataSource.initialize()
-    await dataSource.synchronize()
-    return dataSource
-}
 
 describe('PG User account repo', () => {
     describe('load', () => {
