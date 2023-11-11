@@ -1,69 +1,72 @@
-import { Column, DataSource, Entity, PrimaryGeneratedColumn, Repository } from 'typeorm'
-import { LoadUserAccountRepository } from '../../../../src/data/contracts/repositories'
-import { newDb } from 'pg-mem'
+import { DataSource, Repository } from 'typeorm'
+import { LoadUserAccountRepository } from '@/data/contracts/repositories'
+import { IBackup, IMemoryDb, newDb } from 'pg-mem'
+import { PgUser } from '@/infra/postgres/entities'
+import { PgAccountRepository } from '@/infra/postgres/repositories'
 
-class PgAccountRepository implements LoadUserAccountRepository {
-    constructor(private readonly repository: Repository<PgUser> ) {}
-    async load(params: LoadUserAccountRepository.Params): Promise<LoadUserAccountRepository.Result> {
-       const pgUser = await this.repository.findOne({ where: { email: params.email }})
-       if (pgUser) {
-           return {
-            id: pgUser.id.toString(),
-            name: pgUser.name ?? undefined
-           }
-       }
-    }
+const makeFakeDb = async (): Promise<IMemoryDb> => {
+    const db = newDb({
+        autoCreateForeignKeyIndices: true
+    })
+     
+    db.public.registerFunction({
+        implementation: () => 'test',
+        name: 'current_database',
+    });
+
+    db.public.registerFunction({
+        implementation: () => 'test',
+        name: 'version',
+    })
+    return db
 }
 
-@Entity({ name: 'usuarios'})
-export class PgUser {
-    @PrimaryGeneratedColumn()
-    id!: number
-
-    @Column({  nullable: true, name: 'nome'})
-    name?: string
-
-    @Column()
-    email!: string
-
-    @Column({ nullable: true, name: 'id_facebook'})
-    facebookId?: string
+const makeFakeDataSource = async (db: IMemoryDb): Promise<DataSource>  => {
+    const dataSource = await db.adapters.createTypeormDataSource({
+        type: 'postgres',
+        entities: ['src/infra/postgres/entities/index.ts']
+    })
+        
+    await dataSource.initialize()
+    await dataSource.synchronize()
+    return dataSource
 }
 
 describe('PG User account repo', () => {
     describe('load', () => {
+        let sut: LoadUserAccountRepository
+        let pgUserRepository: Repository<PgUser>
+        let dataSource: DataSource
+        let backup: IBackup
+        
+        beforeAll(async () => {
+            const db  = await makeFakeDb()
+            dataSource = await makeFakeDataSource(db)
+            pgUserRepository = dataSource.getRepository(PgUser)
+            backup = db.backup()
+        })
+    
+        beforeEach(() => {
+            backup.restore()
+            sut = new PgAccountRepository(pgUserRepository)
+        })
+    
+        afterAll(async () => {
+            await dataSource.destroy()
+        })
+
         it('Should return an account if email exists', async () => {
-            const db = newDb({
-                autoCreateForeignKeyIndices: true
-            })
-             
-            db.public.registerFunction({
-                implementation: () => 'test',
-                name: 'current_database',
-            });
-
-            db.public.registerFunction({
-                implementation: () => 'test',
-                name: 'version',
-            })
-             
-            const dataSource: DataSource = await db.adapters.createTypeormDataSource({
-                type: 'postgres',
-                entities: [PgUser]
-            })
-
-            await dataSource.initialize()
-            await dataSource.synchronize()
-
-            const pgUserRepository = dataSource.getRepository(PgUser)
             await pgUserRepository.save({ email: 'existing_email' })
-
-
-            const sut = new PgAccountRepository(pgUserRepository)
             const account = await sut.load({ email: 'existing_email' })
             expect(account).toEqual({
                 id: '1'
             })
         })
+
+        it('Should return undefined if email does not exist', async () => {
+            const account = await sut.load({ email: 'existing_email' })
+            expect(account).toEqual(undefined)
+        })
+  
     })
 })
